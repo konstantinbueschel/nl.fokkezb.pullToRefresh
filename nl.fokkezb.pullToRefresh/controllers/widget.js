@@ -1,4 +1,3 @@
-var LTAG = '[PullToRefreshWidget]';
 var refreshControl;
 var list;
 
@@ -6,141 +5,103 @@ $.refresh = refresh;
 
 $.show = show;
 $.hide = hide;
-
-$.setTitle = setTitle;
 $.getList = getList;
+$.getControl = getControl;
 
 (function constructor(args) {
 
-	var refresher;
+  if (args.dontInit || (!OS_IOS && !OS_ANDROID)){
+    if (!args.dontInit) console.warn('[pullToRefresh] only supports iOS and Android.');
 
-	if (!OS_IOS && !OS_ANDROID) {
-		console.warn('[pullToRefresh] only supports iOS and Android.');
+    if (_.isArray(args.children)) {
+      _.map(args.children, $.addTopLevelView);
+    }
 
-		if (_.isArray(args.children)) {
-			_.map(args.children, $.addTopLevelView);
-		}
+    return;
+  }
 
-		return;
-	}
+  if (!_.isArray(args.children) || !_.contains(['Titanium.UI.ListView', 'Titanium.UI.TableView', 'Ti.UI.ListView', 'Ti.UI.TableView', 'de.marcelpociot.CollectionView'], args.children[args.children.length-1].apiName)) {
+    console.error('[pullToRefresh] is missing required Ti.UI.ListView or Ti.UI.TableView or de.marcelpociot.CollectionView as first child element.');
+    return;
+  }
 
-	if (!_.isArray(args.children) || !_.contains([
-			'Titanium.UI.ListView', 'Titanium.UI.TableView', 'Ti.UI.ListView', 'Ti.UI.TableView', 'de.marcelpociot.CollectionView'
-		], args.children[args.children.length - 1].apiName)) {
-		console.error('[pullToRefresh] is missing required Ti.UI.ListView or Ti.UI.TableView or de.marcelpociot.CollectionView as first child element.');
-		return;
-	}
+  list = _.last(args.children);
+  delete args.children;
 
-	list = _.last(args.children);
-	delete args.children;
+  _.extend($, args);
 
-	refresher = args.refresher;
-	delete args.refresher;
+  if (OS_IOS) {
+    refreshControl = Ti.UI.createRefreshControl(args);
+    refreshControl.addEventListener('refreshstart', onRefreshstart);
 
-	_.extend($, args);
+    list.refreshControl = refreshControl;
 
-	if (OS_IOS) {
+    $.addTopLevelView(list);
 
-		refreshControl = Ti.UI.createRefreshControl();
-		refreshControl.addEventListener('refreshstart', onRefreshstart);
+  } else if (OS_ANDROID) {
+    refreshControl = require('com.rkam.swiperefreshlayout').createSwipeRefresh(_.extend({
+      view: list
+    }, args));
 
-		if (args.title) {
-			setTitle(args.title);
-		}
+    refreshControl.addEventListener('refreshing', onRefreshstart);
 
-		list.refreshControl = refreshControl;
+    $.addTopLevelView(refreshControl);
+  }
 
-		$.addTopLevelView(list);
-
-	}
-	else if (OS_ANDROID) {
-
-		refreshControl = require('br.com.leoleal.swipetorefresh').createSwipeToRefresh(_.defaults(refresher || {}, {
-
-			view:   list,
-			width:  Ti.UI.FILL,
-			height: Ti.UI.FILL
-		}));
-
-		refreshControl.addEventListener('refreshing', onRefreshstart);
-
-		$.addTopLevelView(refreshControl);
-	}
-
-})($.args);
+})(arguments[0] || {});
 
 function refresh() {
 
-	if (!list) {
-		return;
-	}
+  if (!list) {
+    return;
+  }
 
-	show();
+  show();
 
-	onRefreshstart();
+  onRefreshstart();
 }
 
 function hide() {
 
-	if (!refreshControl) {
-		return;
-	}
+  if (!refreshControl) {
+    return;
+  }
 
-	if (OS_IOS) {
-		refreshControl.endRefreshing();
+  if (OS_IOS) {
+    refreshControl.endRefreshing();
 
-	}
-	else if (OS_ANDROID) {
-		refreshControl.setRefreshing(false);
-	}
+  } else if (OS_ANDROID) {
+    refreshControl.setRefreshing(false);
+  }
 }
 
 function show() {
 
-	if (!refreshControl) {
-		return;
-	}
+  if (!refreshControl) {
+    return;
+  }
 
-	if (OS_IOS) {
-		refreshControl.beginRefreshing();
+  if (OS_IOS) {
+    refreshControl.beginRefreshing();
 
-	}
-	else if (OS_ANDROID) {
-		refreshControl.setRefreshing(true);
-	}
-}
-
-function setTitle(text) {
-
-	if (!refreshControl) {
-		return;
-	}
-
-	if (OS_IOS) {
-
-		if (text.apiName && text.apiName == 'Ti.UI.AttributedString') {
-			refreshTitle = text;
-
-		}
-		else {
-			refreshTitle = Ti.UI.createAttributedString({
-				text: text
-			});
-		}
-
-		refreshControl.title = refreshTitle;
-	}
+  } else if (OS_ANDROID) {
+    refreshControl.setRefreshing(true);
+  }
 }
 
 function getList() {
-	return list;
+  return list;
+}
+
+function getControl() {
+  return refreshControl;
 }
 
 function onRefreshstart() {
 
-	$.trigger('release', {
-		source: $,
-		hide: hide
-	});
+  $.trigger('release', {
+    source: $,
+    hide: hide
+  });
 
 }
