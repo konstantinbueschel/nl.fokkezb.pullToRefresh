@@ -47,7 +47,7 @@ var LTAG = '[nl.fokkezb.pullToRefresh]',
     }
     else if (OS_ANDROID) {
         
-        refreshControl = require('com.rkam.swiperefreshlayout').createSwipeRefresh(_.extend({
+        refreshControl = require('br.com.leoleal.swipetorefresh').createSwipeRefresh(_.extend({
             
             view: list
             

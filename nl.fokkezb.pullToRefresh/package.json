@@ -39,5 +39,8 @@
     "url": "https://github.com/fokkezb/nl.fokkezb.pullToRefresh/issues"
   },
   "homepage": "https://github.com/fokkezb/nl.fokkezb.pullToRefresh#readme",
-  "description": "Uniform wrapper for iOS RefreshControl and Android SwipeRefreshLayout."
+  "description": "Uniform wrapper for iOS RefreshControl and Android SwipeRefreshLayout.",
+  "dependenices": {
+    "br.com.leoleal.swipetorefresh": "*"
+  }
 }
