@@ -47,9 +47,11 @@ var LTAG = '[nl.fokkezb.pullToRefresh]',
     }
     else if (OS_ANDROID) {
         
-        refreshControl = require('br.com.leoleal.swipetorefresh').createSwipeRefresh(_.extend({
+        refreshControl = require('br.com.leoleal.swipetorefresh').createSwipeToRefresh(_.extend({
             
-            view: list
+            view: list,
+            width: Ti.UI.FILL,
+            height: Ti.UI.FILL
             
         }, args));
         
