@@ -11,6 +11,6 @@
 	"tags":"tableview,headerpullview,pulltorefresh,swiperefreshlayout,listview,pullview,refreshcontrol,ticollectionview",
 	"platforms":"ios,android",
 	"modules": {
-		"com.rkam.swiperefreshlayout": "*"
+		"br.com.leoleal.swipetorefresh": "*"
 	}
 }
